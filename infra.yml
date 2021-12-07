@@ -7,7 +7,7 @@ Description: >
 
 Parameters:
     EnvName:
-        Description: Name of the cloudformation environment
+        Description: Name of the cloudformation environment. It will be prefixed to resource names
         Type: String
 
     VpcCIDR: 

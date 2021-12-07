@@ -1,0 +1,14 @@
+[
+  {
+    "ParameterKey": "EnvName",
+    "ParameterValue": "UdagramProject"
+  },
+	{
+    "ParameterKey": "AMIinstanceId",
+    "ParameterValue": "ami-0279c3b3186e54acd"
+  },
+	{
+    "ParameterKey": "WebServerKeyPair",
+    "ParameterValue": "UdagramProjectRegularKeyPair"
+  }
+]
