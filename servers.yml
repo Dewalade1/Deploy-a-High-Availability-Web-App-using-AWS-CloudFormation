@@ -59,8 +59,8 @@ Resources:
           !Sub "${EnvName}-VPCID"
       SecurityGroupIngress:
       - IpProtocol: tcp
-        FromPort: 80
-        ToPort: 80
+        FromPort: 8080
+        ToPort: 8080
         CidrIp: 0.0.0.0/0
 
       - IpProtocol: tcp
@@ -87,12 +87,12 @@ Resources:
         Fn::Base64: !Sub |
           #!/bin/bash
           apt-get update -y
-          apt-get install apache2 -y
           apt-get install unzip awscli -y
+          apt-get install apache2 -y
           systemctl enable httpd
           systemctl start apache2.service
           cd /var/www/html
-          aws s3 cp s3://s3://my-udagram-project-bucket/udagram-website.zip . 
+          aws s3 cp s3://my-udagram-project-bucket/udagram-website.zip . 
           unzip -o udagram-website.zip  
       ImageId: !Sub ${AMIinstanceId}
       KeyName: !Sub ${WebServerKeyPair}
@@ -159,8 +159,8 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Subnets:
-      - Fn::ImportValue: !Sub "${EnvName}-PRIV1-SN"
-      - Fn::ImportValue: !Sub "${EnvName}-PRIV2-SN"
+      - Fn::ImportValue: !Sub "${EnvName}-PRI1-SN"
+      - Fn::ImportValue: !Sub "${EnvName}-PRI2-SN"
       SecurityGroups:
       - Ref: LBSecGroup
 
@@ -196,7 +196,7 @@ Resources:
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 8
       HealthyThresholdCount: 3
-      Port: 80
+      Port: 8080
       Protocol: HTTP
       UnhealthyThresholdCount: 6
       VpcId: 
