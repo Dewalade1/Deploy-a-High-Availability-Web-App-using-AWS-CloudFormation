@@ -1,10 +1,17 @@
+Description: >
+  Dewalade Ade-Onojobi/ Deploy Servers for the "High-Availability Web App using CloudFormation" Project
+ 
+  This template deploys a VPC, with a pair of public and private subnets in an AZ. 
+  It deploys an Internet Gateway, with a default route on the public subnets. 
+  It deploys a NAT Gateway in one AZ, and default routes for them in the private subnet.
+
 Parameters:
-    EnvironmentName:
+    EnvName:
         Description: Name of the cloudformation environment
         Type: String
 
     VpcCIDR: 
-        Description: IP range (CIDR block) for this VPC
+        Description: Please enter the IP range (CIDR notation) for this VPC
         Type: String
         Default: 10.0.0.0/16
 
@@ -35,15 +42,23 @@ Resources:
             CidrBlock: !Ref VpcCIDR
             EnableDnsHostnames: true
             Tags: 
+                - Key: Name 
+                  Value: !Ref EnvName
+                - Key: Project
+                  Value: Udagram
                 - Key: Env_Name 
-                  Value: !Ref EnvironmentName
+                  Value: !Ref EnvName
 
     InternetGateway:
         Type: AWS::EC2::InternetGateway
         Properties:
             Tags:
-                - Key: Env_Name
-                  Value: !Ref EnvironmentName
+                - Key: Name 
+                  Value: !Ref EnvName
+                - Key: Project
+                  Value: Udagram
+                - Key: Env_Name 
+                  Value: !Ref EnvName
 
     InternetGatewayAttachment:
         Type: AWS::EC2::VPCGatewayAttachment
@@ -60,7 +75,11 @@ Resources:
             MapPublicIpOnLaunch: true
             Tags: 
                 - Key: Name 
-                  Value: !Sub ${EnvironmentName} Public Subnet (AZ1)
+                  Value: !Sub ${EnvName} Public Subnet (AZ1)
+                - Key: Project
+                  Value: Udagram
+                - Key: Env_Name 
+                  Value: !Ref EnvName
 
     PublicSubnet2: 
         Type: AWS::EC2::Subnet
@@ -71,7 +90,11 @@ Resources:
             MapPublicIpOnLaunch: true
             Tags: 
                 - Key: Name 
-                  Value: !Sub ${EnvironmentName} Public Subnet (AZ2)
+                  Value: !Sub ${EnvName} Public Subnet (AZ2)
+                - Key: Project
+                  Value: Udagram
+                - Key: Env_Name 
+                  Value: !Ref EnvName
 
     PrivateSubnet1: 
         Type: AWS::EC2::Subnet
@@ -82,7 +105,11 @@ Resources:
             MapPublicIpOnLaunch: false
             Tags: 
                 - Key: Name 
-                  Value: !Sub ${EnvironmentName} Private Subnet (AZ1)
+                  Value: !Sub ${EnvName} Private Subnet (AZ1)
+                - Key: Project
+                  Value: Udagram
+                - Key: Env_Name 
+                  Value: !Ref EnvName
 
     PrivateSubnet2: 
         Type: AWS::EC2::Subnet
@@ -93,7 +120,11 @@ Resources:
             MapPublicIpOnLaunch: false
             Tags: 
                 - Key: Name 
-                  Value: !Sub ${EnvironmentName} Private Subnet (AZ2)
+                  Value: !Sub ${EnvName} Private Subnet (AZ2)
+                - Key: Project
+                  Value: Udagram
+                - Key: Env_Name 
+                  Value: !Ref EnvName
 
     NatGateway1EIP:
         Type: AWS::EC2::EIP
@@ -125,7 +156,11 @@ Resources:
             VpcId: !Ref VPC
             Tags: 
                 - Key: Name 
-                  Value: !Sub ${EnvironmentName} Public Routes
+                  Value: !Sub ${EnvName} Public Routes
+                - Key: Project
+                  Value: Udagram
+                - Key: Env_Name 
+                  Value: !Ref EnvName
 
     DefaultPublicRoute: 
         Type: AWS::EC2::Route
@@ -154,7 +189,11 @@ Resources:
             VpcId: !Ref VPC
             Tags: 
                 - Key: Name 
-                  Value: !Sub ${EnvironmentName} Private Routes (AZ1)
+                  Value: !Sub ${EnvName} Private Routes (AZ1)
+                - Key: Project
+                  Value: Udagram
+                - Key: Env_Name 
+                  Value: !Ref EnvName
 
     DefaultPrivateRoute1:
         Type: AWS::EC2::Route
@@ -175,7 +214,11 @@ Resources:
             VpcId: !Ref VPC
             Tags: 
                 - Key: Name 
-                  Value: !Sub ${EnvironmentName} Private Routes (AZ2)
+                  Value: !Sub ${EnvName} Private Routes (AZ2)
+                - Key: Project
+                  Value: Udagram
+                - Key: Env_Name 
+                  Value: !Ref EnvName
 
     DefaultPrivateRoute2:
         Type: AWS::EC2::Route
@@ -195,58 +238,58 @@ Outputs:
         Description: A reference to the created VPC
         Value: !Ref VPC
         Export:
-          Name: !Sub ${EnvironmentName}-VPCID
+          Name: !Sub ${EnvName}-VPCID
 
     VPCPublicRouteTable:
         Description: Public Routing
         Value: !Ref PublicRouteTable
         Export:
-          Name: !Sub ${EnvironmentName}-PUB-RT
+          Name: !Sub ${EnvName}-PUB-RT
 
     VPCPrivateRouteTable1:
         Description: Private Routing AZ1
         Value: !Ref PrivateRouteTable1
         Export:
-          Name: !Sub ${EnvironmentName}-PRI1-RT
+          Name: !Sub ${EnvName}-PRI1-RT
 
     VPCPrivateRouteTable2:
         Description: Private Routing AZ2
         Value: !Ref PrivateRouteTable2
         Export:
-          Name: !Sub ${EnvironmentName}-PRI2-RT
+          Name: !Sub ${EnvName}-PRI2-RT
 
     PublicSubnets:
         Description: A list of the public subnets
         Value: !Join [ ",", [ !Ref PublicSubnet1, !Ref PublicSubnet2 ]]
         Export:
-          Name: !Sub ${EnvironmentName}-PUB-NETS
+          Name: !Sub ${EnvName}-PUB-NETS
 
     PrivateSubnets:
         Description: A list of the private subnets
         Value: !Join [ ",", [ !Ref PrivateSubnet1, !Ref PrivateSubnet2 ]]
         Export:
-          Name: !Sub ${EnvironmentName}-PRIV-NETS
+          Name: !Sub ${EnvName}-PRIV-NETS
 
     PublicSubnet1:
         Description: A reference to the public subnet in the 1st Availability Zone
         Value: !Ref PublicSubnet1
         Export:
-          Name: !Sub ${EnvironmentName}-PUB1-SN
+          Name: !Sub ${EnvName}-PUB1-SN
 
     PublicSubnet2: 
         Description: A reference to the public subnet in the 2nd Availability Zone
         Value: !Ref PublicSubnet2
         Export:
-          Name: !Sub ${EnvironmentName}-PUB2-SN
+          Name: !Sub ${EnvName}-PUB2-SN
 
     PrivateSubnet1:
         Description: A reference to the private subnet in the 1st Availability Zone
         Value: !Ref PrivateSubnet1
         Export:
-          Name: !Sub ${EnvironmentName}-PRI1-SN
+          Name: !Sub ${EnvName}-PRI1-SN
 
     PrivateSubnet2: 
         Description: A reference to the private subnet in the 2nd Availability Zone
         Value: !Ref PrivateSubnet2
         Export:
-          Name: !Sub ${EnvironmentName}-PRI2-SN
+          Name: !Sub ${EnvName}-PRI2-SN
