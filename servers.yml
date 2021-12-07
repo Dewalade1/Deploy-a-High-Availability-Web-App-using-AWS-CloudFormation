@@ -20,8 +20,15 @@ Parameters:
       Description: Secure Key Pair for Accessing Web Server
       Type: String
 
-Resources:
+  WebServerS3BucketRole:
+      Description: Instance role for the Web Server to access S3 buckets
+      Type: String
 
+  WebServerInstanceType:
+      Description: Instance type for the Web Server AMI
+      Type: String
+
+Resources:
   # SECURITY GROUPS
   LBSecGroup:
     Type: AWS::EC2::SecurityGroup
@@ -35,11 +42,17 @@ Resources:
         FromPort: 80
         ToPort: 80
         CidrIp: 0.0.0.0/0
+
       SecurityGroupEgress:
       - IpProtocol: tcp
         FromPort: 80
         ToPort: 80
         CidrIp: 0.0.0.0/0
+      # - IpProtocol: tcp
+      #   FromPort: 8080
+      #   ToPort: 8080
+      #   CidrIp: 0.0.0.0/0
+
 
   WebAppServerSecGroup:
     Type: AWS::EC2::SecurityGroup
@@ -53,6 +66,17 @@ Resources:
         FromPort: 80
         ToPort: 80
         CidrIp: 0.0.0.0/0
+
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIp: 0.0.0.0/0
+
+      - IpProtocol: tcp #SSH port (delete)
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+
       SecurityGroupEgress:
       - IpProtocol: tcp
         FromPort: 0
@@ -68,6 +92,8 @@ Resources:
           #!/bin/bash
           apt-get update -y
           apt-get install apache2 -y
+          apt-get install unzip awscli -y
+          systemctl enable httpd
           systemctl start apache2.service
           cd /var/www/html
           echo "It works! Udagram, Udacity works!" > index.html         
@@ -75,7 +101,7 @@ Resources:
       KeyName: !Sub ${WebServerKeyPair}
       SecurityGroups:
       - Ref: WebAppServerSecGroup
-      InstanceType: t3.medium
+      InstanceType: !Sub "${WebServerInstanceType}"
       BlockDeviceMappings:
       - DeviceName: "/dev/sdk"
         Ebs:
@@ -94,11 +120,42 @@ Resources:
       TargetGroupARNs:
       - Ref: WebAppTargetGroup
 
-  WebAppProfile:
+  # S3 Bucket
+  S3BucketRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+
+  S3BucketsPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub "${EnvName}-WebSite-S3-Bucket-Policy"
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action:
+              - s3:Get*
+              - s3:List*
+            Resource: "*"
+      Roles:
+        - Ref: WebServerS3BucketRole
+
+  WebAppInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties: 
+      Path: "/"
       Roles:
-        - UdacityAWSRoleForS3ReadOnly
+        - Ref: WebServerS3BucketRole
 
   # LOAD_BALANCERS
   WebAppLB:
@@ -109,6 +166,7 @@ Resources:
       - Fn::ImportValue: !Sub "${EnvName}-PUB2-SN"
       SecurityGroups:
       - Ref: LBSecGroup
+
   Listener:
     Type: AWS::ElasticLoadBalancingV2::Listener
     Properties:
@@ -118,7 +176,7 @@ Resources:
           Ref: WebAppTargetGroup
       LoadBalancerArn:
         Ref: WebAppLB
-      Port: '80'
+      Port: 80
       Protocol: HTTP
 
   ALBListenerRule:
@@ -129,7 +187,7 @@ Resources:
           TargetGroupArn: !Ref 'WebAppTargetGroup'
         Conditions:
         - Field: path-pattern
-          Values: [/]
+          Values: [ / ]
         ListenerArn: !Ref 'Listener'
         Priority: 1
 
@@ -139,16 +197,22 @@ Resources:
       HealthCheckIntervalSeconds: 10
       HealthCheckPath: /
       HealthCheckProtocol: HTTP
-      HealthCheckTimeoutSeconds: 10
-      HealthyThresholdCount: 24
-      Port: 80
+      HealthCheckTimeoutSeconds: 8
+      HealthyThresholdCount: 3
+      Port: 8080
       Protocol: HTTP
-      UnhealthyThresholdCount: 30
+      UnhealthyThresholdCount: 6
       VpcId: 
         Fn::ImportValue:
           Fn::Sub: "${EnvName}-VPCID"
 
 Outputs: 
+    AutoScalingGroup:
+        Description: Public Servers AutoScalingGroup
+        Value: !Ref WebAppAutoScaleGroup
+        Export:
+          Name: !Sub ${EnvName}-Public-Servers-AutoScalingGroup
+
     LoadBalancerDNSName: 
         Description: DNS Name of the Load Balancer
         Value: 
@@ -156,17 +220,11 @@ Outputs:
         Export:
           Name: !Sub ${EnvName}-Load-Balancer-DNS-Name
 
-    # UdagramWebURL: 
-    #     Description: URL of the Udagram Website
-    #     Value: http://${LoadBalancerDNSName}
-    #     Export:
-    #       Name: !Sub ${EnvName}-WebApp-URL
-
-    AutoScalingGroup:
-        Description: Public Servers AutoScalingGroup
-        Value: !Ref WebAppAutoScaleGroup
+    WebAppURL:
+        Description: URL of the Udagram Web App
+        Value: !Join [ "", [ "http://", !GetAtt WebAppLB.DNSName ] ]
         Export:
-          Name: !Sub ${EnvName}-Public-Servers-AutoScalingGroup
+          Name: !Sub "${EnvName}-WebApp-URL"
 
     WebAppLB:
         Description: Wepp App LoadBalancer

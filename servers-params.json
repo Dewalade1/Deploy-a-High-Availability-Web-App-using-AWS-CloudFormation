@@ -3,12 +3,20 @@
     "ParameterKey": "EnvName",
     "ParameterValue": "UdagramProject"
   },
-	{
+  {
     "ParameterKey": "AMIinstanceId",
     "ParameterValue": "ami-0279c3b3186e54acd"
   },
-	{
+  {
     "ParameterKey": "WebServerKeyPair",
     "ParameterValue": "UdagramProjectRegularKeyPair"
+  },
+  {
+    "ParameterKey": "WebServerS3BucketRole",
+    "ParameterValue": "UdacityAWSRoleForS3ReadOnly"
+  },
+  {
+    "ParameterKey": "WebServerInstanceType",
+    "ParameterValue": "t3.medium"
   }
 ]

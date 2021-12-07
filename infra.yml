@@ -1,9 +1,9 @@
 Description: >
-  Dewalade Ade-Onojobi/ Deploy Servers for the "High-Availability Web App using CloudFormation" Project
- 
-  This template deploys a VPC, with a pair of public and private subnets in an AZ. 
-  It deploys an Internet Gateway, with a default route on the public subnets. 
-  It deploys a NAT Gateway in one AZ, and default routes for them in the private subnet.
+    Dewalade Ade-Onojobi/ Deploy Servers for the "High-Availability Web App using CloudFormation" Project
+    
+    This template deploys a VPC, with a pair of public and private subnets in an AZ. 
+    It deploys an Internet Gateway, with a default route on the public subnets. 
+    It deploys a NAT Gateway in one AZ, and default routes for them in the private subnet.
 
 Parameters:
     EnvName:
