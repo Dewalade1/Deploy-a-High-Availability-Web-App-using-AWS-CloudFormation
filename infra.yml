@@ -286,10 +286,10 @@ Outputs:
         Description: A reference to the private subnet in the 1st Availability Zone
         Value: !Ref PrivateSubnet1
         Export:
-          Name: !Sub ${EnvName}-PRI1-SN
+          Name: !Sub ${EnvName}-PRIV1-SN
 
     PrivateSubnet2: 
         Description: A reference to the private subnet in the 2nd Availability Zone
         Value: !Ref PrivateSubnet2
         Export:
-          Name: !Sub ${EnvName}-PRI2-SN
+          Name: !Sub ${EnvName}-PRIV2-SN

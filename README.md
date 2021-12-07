@@ -35,3 +35,5 @@ These are the specs for the EC2 instances used to run the Web App
 - **Volume Size**: 15GB
 
 - **Load Balancer DNS Name**: Check the output section of your created stack in Cloudformation section in you AWS console for this
+
+- **Web App URL**: Check the output section of your created stack in Cloudformation section in you AWS console for this
