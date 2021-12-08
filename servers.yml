@@ -59,8 +59,8 @@ Resources:
           !Sub "${EnvName}-VPCID"
       SecurityGroupIngress:
       - IpProtocol: tcp
-        FromPort: 8080
-        ToPort: 8080
+        FromPort: 80
+        ToPort: 80
         CidrIp: 0.0.0.0/0
 
       - IpProtocol: tcp
@@ -77,7 +77,7 @@ Resources:
       - IpProtocol: tcp
         FromPort: 0
         ToPort: 65535
-        CidrIp: 30.0.0.0/16
+        CidrIp: 0.0.0.0/0
 
   # AUTOSCALING GROUPS
   WebAppLaunchConfig:
@@ -86,30 +86,29 @@ Resources:
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
-          apt-get update -y
-          apt-get install unzip awscli -y
-          apt-get install apache2 -y
-          systemctl enable httpd
-          systemctl start apache2.service
+          sudo apt-get update -y
+          sudo apt-get install apache2 -y
+          sudo systemctl start apache2.service
           cd /var/www/html
-          aws s3 cp s3://my-udagram-project-bucket/udagram-website.zip . 
-          unzip -o udagram-website.zip  
+          sudo chmod 007 index.html
+          echo "It works! Udagram, Udacity" > index.html 
       ImageId: !Sub ${AMIinstanceId}
-      KeyName: !Sub ${WebServerKeyPair}
+      KeyName: !Sub ${WebServerKeyPair} #(delete)
       SecurityGroups:
       - Ref: WebAppServerSecGroup
       InstanceType: !Sub "${WebServerInstanceType}"
+      IamInstanceProfile: !Ref WebAppInstanceProfile
       BlockDeviceMappings:
       - DeviceName: "/dev/sdk"
         Ebs:
-          VolumeSize: '15'
+          VolumeSize: '10'
           
   WebAppAutoScaleGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     Properties:
       VPCZoneIdentifier:
       - Fn::ImportValue: 
-          !Sub "${EnvName}-PRIV-NETS"
+          !Sub "${EnvName}-PUB-NETS"
       LaunchConfigurationName:
         Ref: WebAppLaunchConfig
       MinSize: '4'
@@ -159,8 +158,8 @@ Resources:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
       Subnets:
-      - Fn::ImportValue: !Sub "${EnvName}-PRI1-SN"
-      - Fn::ImportValue: !Sub "${EnvName}-PRI2-SN"
+      - Fn::ImportValue: !Sub "${EnvName}-PUB1-SN"
+      - Fn::ImportValue: !Sub "${EnvName}-PUB2-SN"
       SecurityGroups:
       - Ref: LBSecGroup
 
@@ -195,10 +194,10 @@ Resources:
       HealthCheckPath: /
       HealthCheckProtocol: HTTP
       HealthCheckTimeoutSeconds: 8
-      HealthyThresholdCount: 3
-      Port: 8080
+      HealthyThresholdCount: 2
+      Port: 80
       Protocol: HTTP
-      UnhealthyThresholdCount: 6
+      UnhealthyThresholdCount: 5
       VpcId: 
         Fn::ImportValue:
           Fn::Sub: "${EnvName}-VPCID"

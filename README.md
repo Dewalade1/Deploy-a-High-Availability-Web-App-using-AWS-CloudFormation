@@ -30,10 +30,10 @@ These are the specs for the EC2 instances used to run the Web App
 
 - **Amazon Machine AMI:** Ubuntu Server 18.04 LTS (HVM), SSD Volume Type - ami-0279c3b3186e54acd (64-bit x86)
 
-- **Instance Type**: t2.medium (vCPU=2, Memory=4GB)
+- **Instance Type**: t3.medium (vCPU=2, Memory=4GB)
 
-- **Volume Size**: 15GB
+- **Volume Size**: 10GB
 
-- **Load Balancer DNS Name**: Check the output section of your created stack in Cloudformation section in you AWS console for this
+- **Load Balancer DNS Name**: [Udagr-WebAp-TJXQ4CD5ITTR-886192836.us-east-1.elb.amazonaws.com](http://udagr-webap-tjxq4cd5ittr-886192836.us-east-1.elb.amazonaws.com)
 
-- **Web App URL**: Check the output section of your created stack in Cloudformation section in you AWS console for this
+- **Web App URL**: [http://udagr-webap-tjxq4cd5ittr-886192836.us-east-1.elb.amazonaws.com](http://udagr-webap-tjxq4cd5ittr-886192836.us-east-1.elb.amazonaws.com)

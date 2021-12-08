@@ -9,7 +9,7 @@
   },
   {
     "ParameterKey": "WebServerKeyPair",
-    "ParameterValue": "UdagramProjectRegularKeyPair"
+    "ParameterValue": "UdagramProjectSSHKeyPair"
   },
   {
     "ParameterKey": "WebServerS3BucketRole",
